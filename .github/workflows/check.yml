@@ -21,7 +21,7 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
-          curl -s -H "Title: Prueba alerta Entel" -H "Tags: white_check_mark" \
+          curl -s -H "Title: Prueba alerta Entel" -H "Tags: white_check_mark" -H "Priority: urgent" \
             -d "Si ves esto, las alertas del iPhone 18 Pro Max funcionan." \
             "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
       - name: Revisar stock
