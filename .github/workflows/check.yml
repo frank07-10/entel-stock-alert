@@ -1,0 +1,30 @@
+name: Revisar stock iPhone 18 Pro Max
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # cada 15 minutos (GitHub puede retrasarlo unos minutos)
+  workflow_dispatch:
+    inputs:
+      prueba:
+        description: "Enviar notificacion de prueba"
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Notificacion de prueba
+        if: ${{ inputs.prueba }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          curl -s -H "Title: Prueba alerta Entel" -H "Tags: white_check_mark" \
+            -d "Si ves esto, las alertas del iPhone 18 Pro Max funcionan." \
+            "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
+      - name: Revisar stock
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 check_stock.py
