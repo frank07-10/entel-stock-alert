@@ -1,0 +1,17 @@
+name: Notificacion de prueba
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Enviar prueba a ntfy
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          curl -sf -H "Title: Prueba alerta Entel" -H "Tags: white_check_mark" -H "Priority: urgent" \
+            -d "Si ves esto, las alertas del iPhone 18 Pro Max (256/512 GB, Black/Burgundy) funcionan." \
+            "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
