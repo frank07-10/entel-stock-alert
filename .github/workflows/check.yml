@@ -1,6 +1,6 @@
 name: Revisar stock iPhone 18 Pro Max
 
-# Cada ejecucion revisa la pagina cada 10 min durante ~5h40m y al final se relanza sola.
+# Revisa 256GB y 512GB (solo Black y Burgundy) cada 10 min durante ~5h40m y al final se relanza sola.
 # El cron es solo un respaldo por si la cadena se corta (GitHub lo ejecuta con retraso).
 on:
   schedule:
@@ -9,6 +9,10 @@ on:
     inputs:
       prueba:
         description: "Enviar notificacion de prueba"
+        type: boolean
+        default: false
+      verificar:
+        description: "Solo verificar que lee ambas paginas (no queda corriendo)"
         type: boolean
         default: false
 
@@ -34,12 +38,18 @@ jobs:
           curl -s -H "Title: Prueba alerta Entel" -H "Tags: white_check_mark" -H "Priority: urgent" \
             -d "Si ves esto, las alertas del iPhone 18 Pro Max funcionan." \
             "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
+      - name: Verificar lectura de ambas paginas
+        if: ${{ inputs.verificar }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 -u check_stock.py --verify
       - name: Revisar stock cada 10 min
+        if: ${{ !inputs.verificar }}
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python3 -u check_stock.py --loop 340 10
       - name: Relanzar el monitor
-        if: ${{ always() && github.ref == 'refs/heads/main' }}
+        if: ${{ always() && !inputs.verificar && github.ref == 'refs/heads/main' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run check.yml --ref main -R "$GITHUB_REPOSITORY"
