@@ -12,6 +12,6 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
-          curl -sf -H "Title: Prueba alerta Entel" -H "Tags: white_check_mark" -H "Priority: urgent" \
-            -d "Si ves esto, las alertas del iPhone 18 Pro Max (256/512 GB, Black/Burgundy) funcionan." \
+          curl -sf -H "Title: Prueba alerta Xiaomi" -H "Tags: white_check_mark" -H "Priority: urgent" \
+            -d "Si ves esto, las alertas de precio del Robot Vacuum 6 Max y 6 Pro funcionan." \
             "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
