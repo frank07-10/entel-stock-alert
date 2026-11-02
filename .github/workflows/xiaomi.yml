@@ -1,0 +1,43 @@
+name: Precio aspiradoras Xiaomi
+
+# Revisa el precio del Robot Vacuum 6 Max y 6 Pro cada 10 min durante ~5h40m y al final se relanza sola.
+# El cron es solo un respaldo por si la cadena se corta.
+on:
+  schedule:
+    - cron: "30 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      verificar:
+        description: "Solo verificar que lee los precios (no queda corriendo)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: xiaomi-price-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar lectura de precios
+        if: ${{ inputs.verificar }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 -u check_xiaomi.py
+      - name: Revisar precio cada 10 min
+        if: ${{ !inputs.verificar }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 -u check_xiaomi.py --loop 340 10
+      - name: Relanzar el monitor
+        if: ${{ always() && !inputs.verificar && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run xiaomi.yml --ref main -R "$GITHUB_REPOSITORY"
